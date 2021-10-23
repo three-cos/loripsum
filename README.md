@@ -18,9 +18,9 @@ use Wardenyarn\Loripsum\Loremipsum;
 $lorem = new Loremipsum;
 
 $result = $lorem->with(['headers', 'ul', 'bq'])
-	->long()
-	->length(10)
-	->html(); // html with 10 long paragraphs with headings (h1-h6), unordered lists and blockquotes
+    ->long()
+    ->length(10)
+    ->html(); // html with 10 long paragraphs with headings (h1-h6), unordered lists and blockquotes
 
 // OR
 
@@ -63,13 +63,13 @@ use Wardenyarn\Loripsum\Loremipsum;
 $lorem = new Loremipsum;
 
 $result = $lorem
-	->short()
-	->medium()
-	->long()
-	->verylong()
-	// OR
-	->size('short')
-	->html();
+    ->short()
+    ->medium()
+    ->long()
+    ->verylong()
+    // OR
+    ->size('short')
+    ->html();
 ```
 
 ## Misc
@@ -79,12 +79,12 @@ use Wardenyarn\Loripsum\Loremipsum;
 $lorem = new Loremipsum;
 
 $result = $lorem
-	->notPrude() // Will use potentially offensive Latin words 
-	->html();
+    ->notPrude() // Will use potentially offensive Latin words 
+    ->html();
 
 $result = $lorem
-	->allcaps() // Will uppercase all output
-	->html();
+    ->allcaps() // Will uppercase all output
+    ->html();
 
 $result = $lorem->plaintext(); // Will strip tags
 ```
@@ -95,17 +95,17 @@ use Wardenyarn\Loripsum\WithLoremIpsum;
 
 class Example
 {
-	use WithLoremIpsum;
+    use WithLoremIpsum;
 
-	function factory()
-	{
-		return [
-			'body' = $this->loremIpsum() // returns an instance of Wardenyarn\Loripsum\Loremipsum
-				->random()
-				->html(),
-			...
-		]
-	}
+    function factory()
+    {
+    return [
+            'body' = $this->loremIpsum() // returns an instance of Wardenyarn\Loripsum\Loremipsum
+                ->random()
+                ->html(),
+            ...
+        ]
+    }
 }
 ```
 
