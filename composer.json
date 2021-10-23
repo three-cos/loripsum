@@ -1,0 +1,25 @@
+{
+    "name": "wardenyarn/loripsum",
+    "description": "Simple https://loripsum.net API helper",
+    "keywords": [
+        "wardenyarn",
+        "loripsum"
+    ],
+    "homepage": "https://github.com/three-cos/loripsum",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Wardenyarn\\Loripsum\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Warden Yarn",
+            "email": "three.cos@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^5.6|^7.4|^8.0"
+    }
+}
