@@ -99,7 +99,7 @@ class Example
 
     function factory()
     {
-    return [
+        return [
             'body' = $this->loremIpsum() // returns an instance of Wardenyarn\Loripsum\Loremipsum
                 ->random()
                 ->html(),
