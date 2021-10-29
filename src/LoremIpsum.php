@@ -63,7 +63,7 @@ class LoremIpsum
 	 * @param  string $size
 	 * @return self
 	 */
-	public function size($size)
+	public function size(string $size)
 	{
 		if (in_array($size, self::AVAILABLE_SIZES)) {
 			$this->size = $size;
@@ -159,7 +159,7 @@ class LoremIpsum
 	 * Apply random size and options
 	 * @return self
 	 */
-	public function random($max_paragraphs = 10)
+	public function random(int $max_paragraphs = 10)
 	{
 		$this->length(rand(1, $max_paragraphs));
 
@@ -190,6 +190,10 @@ class LoremIpsum
 		if ($this->prude) {
 			$this->options[] = 'prude';
 		}
+
+		$this->options = array_filter($this->options, function($option) {
+			return in_array($option, self::AVAILABLE_OPTIONS);
+		});
 
 		return implode('/', $this->options);
 	}
