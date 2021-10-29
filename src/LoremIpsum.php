@@ -37,6 +37,16 @@ class LoremIpsum
 	protected $prude = true;
 
 	/**
+	 * @var \GuzzleHttp\Client
+	 */
+	protected $http_client;
+
+	public function __construct()
+	{
+		$this->http_client = new \GuzzleHttp\Client();
+	}
+
+	/**
 	 * Set number of paragraphs
 	 * @param  int    $num
 	 * @return self
@@ -199,7 +209,7 @@ class LoremIpsum
 	 */
 	protected function get()
 	{
-		return file_get_contents($this->getUrl());
+		return $this->http_client->request('GET', $this->getUrl())->getBody();
 	}
 
 	/**
