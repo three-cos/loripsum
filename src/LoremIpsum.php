@@ -10,7 +10,7 @@ use Symfony\Component\DomCrawler\Crawler;
 class LoremIpsum 
 {
 	const API = 'https://loripsum.net/api';
-	const AVAILABLE_OPTIONS = ['decorate', 'link', 'ul', 'ol', 'dl', 'bq', 'code', 'headers'];
+	const AVAILABLE_OPTIONS = ['decorate', 'link', 'ul', 'ol', 'dl', 'bq', 'code', 'headers', 'plaintext'];
 	const AVAILABLE_SIZES   = ['short', 'medium', 'long', 'verylong'];
 
 	/**
