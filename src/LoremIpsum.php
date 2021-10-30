@@ -2,6 +2,8 @@
 
 namespace Wardenyarn\Loripsum;
 
+use Symfony\Component\DomCrawler\Crawler;
+
 /**
  * A helper class for https://loripsum.net/ API
  */
@@ -35,6 +37,24 @@ class LoremIpsum
 	 * @var boolean
 	 */
 	protected $prude = true;
+
+	/**
+	 * Array of img src values
+	 * @var array
+	 */
+	protected $image_sources = [];
+
+	/**
+	 * Insert images into output 
+	 * @var boolean
+	 */
+	protected $use_images = false;
+
+	/**
+	 * Percent of probablitity to insert img after DOM node
+	 * @var integer
+	 */
+	protected $image_chance = 30;
 
 	/**
 	 * @var \GuzzleHttp\Client
@@ -156,6 +176,87 @@ class LoremIpsum
 	}
 
 	/**
+	 * Set image sources
+	 * @return self
+	 */
+	public function withImages($image_sources = [])
+	{
+		$this->image_sources = $image_sources;
+
+		$this->use_images = true;
+
+		return $this;
+	}
+
+	/**
+	 * Set image probability
+	 * @param  integer $chance
+	 * @return self
+	 */
+	public function imageChance(int $chance)
+	{
+		if ($chance <= 100 & $chance >= 1) {
+			$this->image_chance = $chance;
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Insert images into generated html
+	 * @param  string $html
+	 * @return string
+	 */
+	protected function insertImages($html)
+	{
+		$dom = new Crawler($html);
+		$dom_with_images = new \DOMDocument;
+
+		foreach ($dom->filter('body > *') as $node) {
+			$cloned_node = $dom_with_images->importNode($node, true);
+			$dom_with_images->appendChild($cloned_node);
+
+			if ($this->image_chance >= rand(0, 100)) {
+				$node_img = $dom_with_images->createElement('img');
+				$node_img->setAttribute('src', $this->getImage());
+				
+				$dom_with_images->appendChild($node_img);
+			}
+		}
+
+		return $dom_with_images->saveHtml();
+	}
+
+	/**
+	 * Return image source
+	 * @return string 
+	 */
+	protected function getImage()
+	{
+		return array_shift($this->image_sources) ?? '//via.placeholder.com/'.$this->getImageDimension(rand(640, 1024));
+	}
+
+	/**
+	 * Generate width x height string for placeholder.com
+	 * @param  int $width
+	 * @return string
+	 */
+	protected function getImageDimension($width)
+	{
+		$image_proportions = ['1:1', '2:1', '4:3', '8:5', '16:9', '16:10'];
+		
+		shuffle($image_proportions);
+
+		$proportion = reset($image_proportions);
+
+		list($width_proportion, $height_proportion) = explode(':', $proportion);
+
+		$height = floor($width / $width_proportion * $height_proportion);
+
+		return "{$width}x{$height}";
+	}
+
+	/**
 	 * Apply random size and options
 	 * @return self
 	 */
@@ -177,6 +278,8 @@ class LoremIpsum
 
 		$random_size = rand(0, count(self::AVAILABLE_SIZES) - 1);
 		$this->size = self::AVAILABLE_SIZES[$random_size];
+
+		$this->use_images = rand(0, 1) ? true : false;
 
 		return $this;
 	}
@@ -213,7 +316,7 @@ class LoremIpsum
 	 */
 	protected function get()
 	{
-		return $this->http_client->request('GET', $this->getUrl())->getBody();
+		return $this->http_client->request('GET', $this->getUrl())->getBody()->getContents();
 	}
 
 	/**
@@ -222,7 +325,13 @@ class LoremIpsum
 	 */
 	public function html()
 	{
-		return $this->get();
+		$html = $this->get();
+
+		if ($this->use_images) {
+			$html = $this->insertImages($html);
+		}
+
+		return $html;
 	}
 
 	/**

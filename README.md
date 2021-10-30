@@ -20,6 +20,7 @@ $lorem = new Loremipsum;
 $result = $lorem->with(['headers', 'ul', 'bq'])
     ->long()
     ->length(10)
+    ->withImages() // insert random images from placeholder.com
     ->html(); // html with 10 long paragraphs with headings (h1-h6), unordered lists and blockquotes
 
 // OR
@@ -69,6 +70,22 @@ $result = $lorem
     ->verylong()
     // OR
     ->size('short')
+    ->html();
+```
+
+## Images
+```php
+use Wardenyarn\Loripsum\Loremipsum;
+
+$lorem = new Loremipsum;
+
+$result = $lorem
+    ->withImages() // insert random images from placeholder.com
+    ->imageChance(60) // Probability percent of inserting image after DOM node; Default: 30%
+    ->html();
+
+$result = $lorem
+    ->withImages(['/src/1.jpg', '/src/2.jpg']) // Will use given images first
     ->html();
 ```
 
