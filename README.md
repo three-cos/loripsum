@@ -14,54 +14,72 @@ composer require wardenyarn/loripsum
 
 ```php
 use Wardenyarn\Loripsum\Loremipsum;
+use Wardenyarn\Loripsum\Enums\Option;
 
-$lorem = new Loremipsum;
+$lorem = new Loremipsum();
 
-$result = $lorem->with(['headers', 'ul', 'bq'])
+$result = $lorem
+    ->with([
+        Option::HEADERS,
+        Option::UNORDERED_LIST,
+        Option::BLOCKQUOTE,
+    ])
     ->long()
-    ->length(10)
+    ->paragraphs(10)
     ->withImages() // insert random images from placeholder.com
     ->html(); // html with 10 long paragraphs with headings (h1-h6), unordered lists and blockquotes
 
 // OR
 
-$lorem->random($max_paragraphs = 10)->html(); // html with randomly applied options, size and number of paragraphs
+$lorem->random($max_paragraphs = 10)->html(); // html with randomly applied options and size
 ```
 
 ## `with()` Options
 ```php
-Wardenyarn\Loripsum\Loremipsum::AVAILABLE_OPTIONS; // Array of available options
+Wardenyarn\Loripsum\Enums\Option::AVAILABLE_OPTIONS; // Array of available options
 ```
-* decorate - Add bold, italic and marked text.
-* link - Add links.
-* ul - Add unordered lists.
-* ol - Add numbered lists.
-* dl - Add description lists.
-* bq - Add blockquotes.
-* code - Add code samples.
-* headers - Add headers.
+* `Option::DECORATE` - Add bold, italic and marked text.
+* `Option::LINK` - Add links.
+* `Option::UNORDERED_LIST` - Add unordered lists.
+* `Option::ORDERED_LIST` - Add numbered lists.
+* `Option::DESCRIPTION_LIST` - Add description lists.
+* `Option::BLOCKQUOTE` - Add blockquotes.
+* `Option::CODE` - Add code samples.
+* `Option::HEADERS` - Add headers (h1-h6).
+* `Option::AS_PLAINTEXT` - Return result as plain text.
+* `Option::ALL_CAPS` - Return result in all uppercase letters.
+* `Option::PRUDE` - Avoid potentially offensive Latin words (applied as default, you can disable it with `notPrude()` method)
 
 ```php
 use Wardenyarn\Loripsum\Loremipsum;
+use Wardenyarn\Loripsum\Enums\Option;
 
-$lorem = new Loremipsum;
+$lorem = new Loremipsum();
 
-$result = $lorem->with(['decorate', 'link', 'ul', 'ol', 'dl', 'bq', 'code', 'headers'])->html();
+$result = $lorem
+    ->with([
+        Option::DECORATE,
+        Option::LINK,
+        Option::UNORDERED_LIST,
+        ...
+    ])
+    ->html();
 ```
 
 ## Sizes
 ```php
-Wardenyarn\Loripsum\Loremipsum::AVAILABLE_SIZES; // Array of available sizes
+Wardenyarn\Loripsum\Enums\Size::AVAILABLE_SIZES; // Array of available sizes
 ```
-* short
-* medium
-* long
-* verylong
+* `Size::SHORT`
+* `Size::MEDIUM`
+* `Size::LONG`
+* `Size::VERY_LONG`
 
 ```php
 use Wardenyarn\Loripsum\Loremipsum;
+use Wardenyarn\Loripsum\Enums\Size;
 
-$lorem = new Loremipsum;
+$lorem = new Loremipsum();
 
 $result = $lorem
     ->short()
@@ -69,7 +87,7 @@ $result = $lorem
     ->long()
     ->verylong()
     // OR
-    ->size('short')
+    ->size(Size::SHORT)
     ->html();
 ```
 
@@ -77,7 +95,7 @@ $result = $lorem
 ```php
 use Wardenyarn\Loripsum\Loremipsum;
 
-$lorem = new Loremipsum;
+$lorem = new Loremipsum();
 
 $result = $lorem
     ->withImages() // insert random images from placeholder.com
@@ -93,7 +111,7 @@ $result = $lorem
 ```php
 use Wardenyarn\Loripsum\Loremipsum;
 
-$lorem = new Loremipsum;
+$lorem = new Loremipsum();
 
 $result = $lorem
     ->notPrude() // Will use potentially offensive Latin words 

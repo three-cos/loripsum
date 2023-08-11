@@ -20,9 +20,9 @@
         }
     ],
     "require": {
-        "php": "^7.2.5 || ^8.0",
+        "php": "^7.2 || ^8.0",
         "guzzlehttp/guzzle": "^7.0",
-        "symfony/dom-crawler": "^5.3",
-        "symfony/css-selector": "^5.3"
+        "symfony/dom-crawler": "^5.3 || ^6.0",
+        "symfony/css-selector": "^5.3 || ^6.0"
     }
 }

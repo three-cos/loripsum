@@ -1,347 +1,320 @@
-<?php 
+<?php
 
 namespace Wardenyarn\Loripsum;
 
+use DOMDocument;
+use GuzzleHttp\Client;
 use Symfony\Component\DomCrawler\Crawler;
+use Wardenyarn\Loripsum\Enums\Option;
+use Wardenyarn\Loripsum\Enums\Size;
 
 /**
  * A helper class for https://loripsum.net/ API
  */
-class LoremIpsum 
+class LoremIpsum
 {
-	const API = 'https://loripsum.net/api';
-	const AVAILABLE_OPTIONS = ['decorate', 'link', 'ul', 'ol', 'dl', 'bq', 'code', 'headers', 'plaintext'];
-	const AVAILABLE_SIZES   = ['short', 'medium', 'long', 'verylong'];
+    public const API = 'https://loripsum.net/api';
 
-	/**
-	 * Array of used text parameters
-	 * @var array
-	 */
-	protected $options = [];
+    /**
+     * Array of used text parameters
+     */
+    protected array $options = [];
 
-	/**
-	 * Size of paragraphs
-	 * @var string
-	 */
-	protected $size = 'short';
+    /**
+     * Size of paragraphs
+     */
+    protected string $size = Size::SHORT;
 
-	/**
-	 * Number of paragraphs
-	 * @var integer
-	 */
-	protected $length = 5;
+    /**
+     * Number of paragraphs
+     */
+    protected int $length = 5;
 
-	/**
-	 * From loripsum.net:
-	 * The original text contains a few instances of words like 'sex' or 'homo'. Personally, we don't mind, because these are just common latin words meaning 'six' and 'man'. However, some people (or your clients) might be offended by this, so if you select the 'Prude version', these words will be censored.
-	 * @var boolean
-	 */
-	protected $prude = true;
+    /**
+     * From loripsum.net:
+     * The original text contains a few instances of words like 'sex' or 'homo'. Personally, we don't mind, because these are just common latin words meaning 'six' and 'man'. However, some people (or your clients) might be offended by this, so if you select the 'Prude version', these words will be censored.
+     */
+    protected bool $prude = true;
 
-	/**
-	 * Array of img src values
-	 * @var array
-	 */
-	protected $image_sources = [];
+    /**
+     * Array of img src values
+     */
+    protected array $image_sources = [];
 
-	/**
-	 * Insert images into output 
-	 * @var boolean
-	 */
-	protected $use_images = false;
+    /**
+     * Insert images into output
+     */
+    protected bool $use_images = false;
 
-	/**
-	 * Percent of probablitity to insert img after DOM node
-	 * @var integer
-	 */
-	protected $image_chance = 30;
+    /**
+     * Percent of probablitity to insert img after DOM node
+     */
+    protected int $image_chance = 30;
 
-	/**
-	 * @var \GuzzleHttp\Client
-	 */
-	protected $http_client;
+    protected Client $http_client;
 
-	public function __construct()
-	{
-		$this->http_client = new \GuzzleHttp\Client();
-	}
+    public function __construct()
+    {
+        $this->http_client = new Client();
+    }
 
-	/**
-	 * Set number of paragraphs
-	 * @param  int    $num
-	 * @return self
-	 */
-	public function length(int $num)
-	{
-		$this->length = $num;
+    /**
+     * @deprecated use paragraphs() instead
+     */
+    public function length(int $number): self
+    {
+        return $this->paragraphs($number);
+    }
 
-		return $this;
-	}
+    /**
+     * Set number of paragraphs
+     */
+    public function paragraphs(int $number): self
+    {
+        if ($number > 0) {
+            $this->length = $number;
+        }
 
-	/**
-	 * Set paragraph size
-	 * @param  string $size
-	 * @return self
-	 */
-	public function size(string $size)
-	{
-		if (in_array($size, self::AVAILABLE_SIZES)) {
-			$this->size = $size;
-		}
+        return $this;
+    }
 
-		return $this;
-	}
+    /**
+     * Set paragraph size
+     */
+    public function size(string $size): self
+    {
+        if (Size::isValid($size)) {
+            $this->size = $size;
+        }
 
-	/**
-	 * Set paragraph size to short
-	 * @return self
-	 */
-	public function short()
-	{
-		$this->size = 'short';
+        return $this;
+    }
 
-		return $this;
-	}
+    /**
+     * Set paragraph size to short
+     */
+    public function short(): self
+    {
+        $this->size = Size::SHORT;
 
-	/**
-	 * Set paragraph size to medium
-	 * @return self
-	 */
-	public function medium()
-	{
-		$this->size = 'medium';
-		
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * Set paragraph size to long
-	 * @return self
-	 */
-	public function long()
-	{
-		$this->size = 'long';
-		
-		return $this;
-	}
+    /**
+     * Set paragraph size to medium
+     */
+    public function medium(): self
+    {
+        $this->size = Size::MEDIUM;
 
-	/**
-	 * Set paragraph size to very long
-	 * @return self
-	 */
-	public function verylong()
-	{
-		$this->size = 'verylong';
-		
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * Use only uppercase characters
-	 * @return self
-	 */
-	public function allcaps()
-	{
-		$this->options[] = 'allcaps';
-		
-		return $this;
-	}
+    /**
+     * Set paragraph size to long
+     */
+    public function long(): self
+    {
+        $this->size = Size::LONG;
 
-	/**
-	 * Allow to use potentially offensive Latin words
-	 * @see $prude description.
-	 * @return self
-	 */
-	public function notPrude()
-	{
-		$this->prude = false;
+        return $this;
+    }
 
-		return $this;
-	}
+    /**
+     * Set paragraph size to very long
+     */
+    public function verylong(): self
+    {
+        $this->size = Size::VERY_LONG;
 
-	/**
-	 * Set text options
-	 * @param  mixed $options
-	 * @return self
-	 */
-	public function with($options)
-	{
-		if (is_array($options)) {
-			$this->options = $options;
-		} else {
-			$this->options[] = $options;
-		}
-		
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * Set image sources
-	 * @return self
-	 */
-	public function withImages($image_sources = [])
-	{
-		$this->image_sources = $image_sources;
+    /**
+     * Use only uppercase characters
+     */
+    public function allcaps(): self
+    {
+        return $this->with(Option::ALL_CAPS);
+    }
 
-		$this->use_images = true;
+    /**
+     * Allow to use potentially offensive Latin words
+     * @see $prude description.
+     */
+    public function notPrude(): self
+    {
+        $this->prude = false;
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * Set image probability
-	 * @param  integer $chance
-	 * @return self
-	 */
-	public function imageChance(int $chance)
-	{
-		if ($chance <= 100 & $chance >= 1) {
-			$this->image_chance = $chance;
-		}
+    /**
+     * Set text options
+     * @param array|string $options
+     */
+    public function with($options): self
+    {
+        if (is_string($options)) {
+            $options = (array) $options;
+        }
 
-		return $this;
-	}
+        foreach ($options as $option) {
+            if (Option::isValid($option)) {
+                $this->options[] = $option;
+            }
+        }
 
-	/**
-	 * Insert images into generated html
-	 * @param  string $html
-	 * @return string
-	 */
-	protected function insertImages($html)
-	{
-		$dom = new Crawler($html);
-		$dom_with_images = new \DOMDocument;
+        return $this;
+    }
 
-		foreach ($dom->filter('body > *') as $node) {
-			$cloned_node = $dom_with_images->importNode($node, true);
-			$dom_with_images->appendChild($cloned_node);
+    /**
+     * Set image sources
+     */
+    public function withImages(array $image_sources = []): self
+    {
+        $this->image_sources = $image_sources;
 
-			if ($this->image_chance >= rand(0, 100)) {
-				$node_img = $dom_with_images->createElement('img');
-				$node_img->setAttribute('src', $this->getImage());
-				
-				$dom_with_images->appendChild($node_img);
-			}
-		}
+        $this->use_images = true;
 
-		return $dom_with_images->saveHtml();
-	}
+        return $this;
+    }
 
-	/**
-	 * Return image source
-	 * @return string 
-	 */
-	protected function getImage()
-	{
-		return array_shift($this->image_sources) ?? '//via.placeholder.com/'.$this->getImageDimension(rand(640, 1024));
-	}
+    /**
+     * Set image probability
+     */
+    public function imageChance(int $chance): self
+    {
+        if ($chance <= 100 && $chance >= 1) {
+            $this->image_chance = $chance;
+        }
 
-	/**
-	 * Generate width x height string for placeholder.com
-	 * @param  int $width
-	 * @return string
-	 */
-	protected function getImageDimension($width)
-	{
-		$image_proportions = ['1:1', '2:1', '4:3', '8:5', '16:9', '16:10'];
-		
-		shuffle($image_proportions);
+        return $this;
+    }
 
-		$proportion = reset($image_proportions);
+    /**
+     * Apply random size and options
+     */
+    public function random(int $max_paragraphs = 10): self
+    {
+        $this->paragraphs(rand(1, $max_paragraphs));
 
-		list($width_proportion, $height_proportion) = explode(':', $proportion);
+        $used_options_count = rand(1, count(Option::AVAILABLE_OPTIONS) - 1);
+        $this->with(Option::getRandomOptions($used_options_count));
 
-		$height = floor($width / $width_proportion * $height_proportion);
+        $this->size = Size::getRandom();
 
-		return "{$width}x{$height}";
-	}
+        $this->use_images = (bool) rand(0, 1);
 
-	/**
-	 * Apply random size and options
-	 * @return self
-	 */
-	public function random(int $max_paragraphs = 10)
-	{
-		$this->length(rand(1, $max_paragraphs));
+        return $this;
+    }
 
-		$used_options = rand(1, count(self::AVAILABLE_OPTIONS) - 1);
+    /**
+     * Return full API query string
+     */
+    public function getUrl(): string
+    {
+        return implode('/', [
+            self::API,
+            $this->length,
+            $this->size,
+            ...$this->getOptions(),
+        ]);
+    }
 
-		$random_options = ($used_options === 1) 
-			? [rand(0, count(self::AVAILABLE_OPTIONS) - 1)]
-			: array_rand(self::AVAILABLE_OPTIONS, $used_options);
+    /**
+     * Return HTML output
+     */
+    public function html(): string
+    {
+        $html = $this->get();
 
-		foreach ($random_options as $option) {
-			if (in_array($option, $random_options)) {
-				$this->options[] = self::AVAILABLE_OPTIONS[$option];
-			}
-		}
+        if ($this->use_images) {
+            $html = $this->insertImages($html);
+        }
 
-		$random_size = rand(0, count(self::AVAILABLE_SIZES) - 1);
-		$this->size = self::AVAILABLE_SIZES[$random_size];
+        return $html;
+    }
 
-		$this->use_images = rand(0, 1) ? true : false;
+    /**
+     * Return plain text output
+     */
+    public function text(): string
+    {
+        $this->with(Option::AS_PLAINTEXT);
 
-		return $this;
-	}
+        return $this->get();
+    }
 
-	/**
-	 * Return options URL string 
-	 * @return string
-	 */
-	protected function getOptions()
-	{
-		if ($this->prude) {
-			$this->options[] = 'prude';
-		}
+    /**
+     * Return options URL string
+     */
+    protected function getOptions(): array
+    {
+        if ($this->prude && ! in_array(Option::PRUDE, $this->options)) {
+            $this->with(Option::PRUDE);
+        }
 
-		$this->options = array_filter($this->options, function($option) {
-			return in_array($option, self::AVAILABLE_OPTIONS);
-		});
+        return $this->options;
+    }
 
-		return implode('/', $this->options);
-	}
+    /**
+     * Insert images into generated html
+     */
+    protected function insertImages(string $html): string
+    {
+        $dom = new Crawler($html);
+        $dom_with_images = new DOMDocument();
 
-	/**
-	 * Return full API query string
-	 * @return string
-	 */
-	public function getUrl()
-	{
-		return self::API.'/'.$this->length.'/'.$this->size.'/'.$this->getOptions();
-	}
+        foreach ($dom->filter('body > *') as $node) {
+            $cloned_node = $dom_with_images->importNode($node, true);
+            $dom_with_images->appendChild($cloned_node);
 
-	/**
-	 * Make a request
-	 * @return string
-	 */
-	protected function get()
-	{
-		return $this->http_client->request('GET', $this->getUrl())->getBody()->getContents();
-	}
+            if ($this->image_chance >= rand(0, 100)) {
+                $node_img = $dom_with_images->createElement('img');
+                $node_img->setAttribute('src', $this->getImage());
 
-	/**
-	 * Return HTML output
-	 * @return string
-	 */
-	public function html()
-	{
-		$html = $this->get();
+                $dom_with_images->appendChild($node_img);
+            }
+        }
 
-		if ($this->use_images) {
-			$html = $this->insertImages($html);
-		}
+        return $dom_with_images->saveHtml();
+    }
 
-		return $html;
-	}
+    /**
+     * Return image source
+     */
+    protected function getImage(): string
+    {
+        return array_shift($this->image_sources) ?? '//via.placeholder.com/'.$this->getImageDimension(rand(640, 1024));
+    }
 
-	/**
-	 * Return plain text output
-	 * @return string
-	 */
-	public function text()
-	{
-		$this->options[] = 'plaintext';
+    /**
+     * Generate width x height string for placeholder.com
+     */
+    protected function getImageDimension(int $width): string
+    {
+        $image_proportions = ['1:1', '2:1', '4:3', '8:5', '16:9', '16:10'];
 
-		return $this->get();
-	}
+        shuffle($image_proportions);
+
+        $proportion = reset($image_proportions);
+
+        list($width_proportion, $height_proportion) = explode(':', $proportion);
+
+        $height = floor($width / $width_proportion * $height_proportion);
+
+        return "{$width}x{$height}";
+    }
+
+    /**
+     * Make a request
+     */
+    protected function get(): string
+    {
+        return $this->http_client
+            ->request('GET', $this->getUrl())
+            ->getBody()
+            ->getContents();
+    }
 }
