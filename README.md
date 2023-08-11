@@ -16,7 +16,7 @@ composer require wardenyarn/loripsum
 use Wardenyarn\Loripsum\Loremipsum;
 use Wardenyarn\Loripsum\Enums\Option;
 
-$lorem = new Loremipsum();
+$lorem = new LoremIpsum();
 
 $result = $lorem
     ->with([
@@ -54,7 +54,7 @@ Wardenyarn\Loripsum\Enums\Option::AVAILABLE_OPTIONS; // Array of available optio
 use Wardenyarn\Loripsum\Loremipsum;
 use Wardenyarn\Loripsum\Enums\Option;
 
-$lorem = new Loremipsum();
+$lorem = new LoremIpsum();
 
 $result = $lorem
     ->with([
@@ -79,7 +79,7 @@ Wardenyarn\Loripsum\Enums\Size::AVAILABLE_SIZES; // Array of available sizes
 use Wardenyarn\Loripsum\Loremipsum;
 use Wardenyarn\Loripsum\Enums\Size;
 
-$lorem = new Loremipsum();
+$lorem = new LoremIpsum();
 
 $result = $lorem
     ->short()
@@ -95,7 +95,7 @@ $result = $lorem
 ```php
 use Wardenyarn\Loripsum\Loremipsum;
 
-$lorem = new Loremipsum();
+$lorem = new LoremIpsum();
 
 $result = $lorem
     ->withImages() // insert random images from placeholder.com
@@ -111,7 +111,7 @@ $result = $lorem
 ```php
 use Wardenyarn\Loripsum\Loremipsum;
 
-$lorem = new Loremipsum();
+$lorem = new LoremIpsum();
 
 $result = $lorem
     ->notPrude() // Will use potentially offensive Latin words 
